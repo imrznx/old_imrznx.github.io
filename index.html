@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JSON Data</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    h2 {
+      color: #333;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    li {
+      margin-bottom: 10px;
+    }
+    button {
+      padding: 5px 10px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+  <script>
+    let pageNumber = 1;
+    let totalItems = 1;
+
+    function loadJSON(page) {
+      fetch(`${page}.json`)
+        .then(response => response.json())
+        .then(data => {
+          totalItems = data[0].split('/')[1];
+          const items = data[1];
+          const list = document.getElementById('data-list');
+          list.innerHTML = '';
+          items.forEach(item => {
+            const li = document.createElement('li');
+            const title = document.createElement('h2');
+            title.textContent = item[0];
+            const description = document.createElement('p');
+            description.textContent = item[1];
+            li.appendChild(title);
+            li.appendChild(description);
+            list.appendChild(li);
+          });
+          const pageInfo = document.getElementById('page-info');
+          pageInfo.textContent = `${page}/${totalItems}`;
+          pageNumber = page;
+          updateButtons();
+          history.pushState({page: page}, `Page ${page}`, `?p=${page}`);
+        })
+        .catch(error => {
+          console.error('Error fetching JSON:', error);
+        });
+    }
+
+    function updateButtons() {
+      const prevButton = document.getElementById('prev-button');
+      const nextButton = document.getElementById('next-button');
+      if (pageNumber > 1) {
+        prevButton.style.display = 'inline-block';
+        prevButton.addEventListener('click', () => loadJSON(pageNumber - 1));
+      } else {
+        prevButton.style.display = 'none';
+      }
+      if (pageNumber < totalItems) {
+        nextButton.style.display = 'inline-block';
+        nextButton.addEventListener('click', () => loadJSON(pageNumber + 1));
+      } else {
+        nextButton.style.display = 'none';
+      }
+    }
+
+    window.onload = function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const pageParam = urlParams.get('p');
+      if (pageParam) {
+        const page = parseInt(pageParam);
+        loadJSON(page);
+      } else {
+        loadJSON(1);
+      }
+    };
+  </script>
+</head>
+<body>
+  <h1>JSON Data</h1>
+  <p id="page-info"></p>
+  <ul id="data-list"></ul>
+  <button id="prev-button" style="display: none;">Previous</button>
+  <button id="next-button" style="display: none;">Next</button>
+</body>
+</html>
