@@ -217,14 +217,15 @@
 
         // Get the page parameter from the URL
         const urlParams = new URLSearchParams(window.location.search);
-        const pageParam = urlParams.get('p');
+        let pageParam = urlParams.get('p');
+
+        // Default to loading 1.json if page parameter is not present
+        if (!pageParam || isNaN(pageParam)) {
+            pageParam = 1;
+        }
 
         // Fetch data based on the page parameter
-        if (pageParam && !isNaN(pageParam)) {
-            fetchData(pageParam);
-        } else {
-            console.error('Invalid page parameter');
-        }
+        fetchData(pageParam);
     </script>
     <script src="assets/scripts.js"></script>
 </body>
